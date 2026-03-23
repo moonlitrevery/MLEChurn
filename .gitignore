@@ -1,3 +1,4 @@
+# Local data: never commit (use CHURN_PROJECT_ROOT + CHURN_DATA_DIR in env)
 datasets/
 data/
 models/
