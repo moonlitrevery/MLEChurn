@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any
@@ -9,7 +10,10 @@ import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
+from src.common.logging_config import log_event
 from src.data.loading import resolve_project_root
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL_REL = Path("models") / "churn_pipeline.joblib"
 
@@ -50,6 +54,7 @@ def load_churn_pipeline(
         )
     if not hasattr(model, "predict_proba"):
         raise TypeError("Loaded estimator has no predict_proba; cannot return churn probability.")
+    log_event(logger, logging.INFO, "churn_pipeline_loaded", path=str(resolved))
     return model
 
 

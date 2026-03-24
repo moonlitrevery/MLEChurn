@@ -45,7 +45,7 @@ python train.py --project-root . --optuna-trials 15 --no-mlflow
 
 Artifacts default to **`models/churn_pipeline.joblib`** (see `paths.model_output` in YAML).
 
-Logging: stderr, level from **`CHURN_LOG_LEVEL`** or **`logging.level`** in YAML or `--log-level`.
+Logging: stderr. Level from **`CHURN_LOG_LEVEL`** or **`logging.level`** in YAML or `--log-level`. Set **`CHURN_LOG_FORMAT=json`** for JSON lines (good for log aggregation). Use **`src.common.logging_config.log_event`** for key-value context on important events.
 
 ## Run API
 
@@ -61,9 +61,11 @@ Docker (from repo root): `docker build -t churn-api -f Dockerfile .` then mount 
 
 ## Monitoring & batch scoring
 
-- **Data drift** — `src.monitoring.data_drift.compute_numeric_drift_report(reference_df, current_df)` compares numeric columns (defaults: schema numerics), reports mean/std deltas, optional KS test (`scipy.stats.ks_2samp`).
-- **SHAP** — `src.monitoring.explainability.explain_global` / `explain_instance` on the fitted `Pipeline` (uses the `model` step after `pipeline[:-1].transform`).
-- **Batch CSV** — `python -m src.batch.run_batch --input path/in.csv --output path/out.csv --project-root .` (set `PYTHONPATH=churn-ml-system`). Reuses `load_csv` and `predict_churn_proba`.
+Generated artifacts go under **`reports/`** (gitignored) with UTC timestamps in filenames.
+
+- **Drift** — `compute_numeric_drift_report` + `save_drift_report` write **`numeric_drift_<timestamp>.json`** (full payload + `generated_at_utc`) and **`.csv`** (one row per feature). From batch, pass **`--drift-reference path/to/train_sample.csv`**.
+- **SHAP** — `design_matrix_as_array`, `compute_batch_shap_values`, `explain_global` / `explain_instance` (clear names; no hidden helpers). Batch: **`--with-shap`** writes **`batch_shap_values_<run_id>.csv`** (row index, optional `id`, SHAP columns) and **`batch_shap_global_<run_id>.json`** (mean |SHAP| for the batch).
+- **Batch CLI** — `PYTHONPATH=churn-ml-system python -m src.batch.run_batch -i in.csv -o out.csv --project-root . [--with-shap] [--drift-reference train.csv] [--reports-dir reports]`.
 
 ## Tests
 

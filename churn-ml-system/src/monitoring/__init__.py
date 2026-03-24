@@ -1,23 +1,16 @@
-"""Operational monitoring: drift detection and model explanations."""
+"""Drift checks and SHAP helpers for churn pipeline."""
 
-from __future__ import annotations
-
-from typing import Any
+from src.monitoring.data_drift import compute_numeric_drift_report, save_drift_report
+from src.monitoring.explainability import (
+    compute_batch_shap_values,
+    explain_global,
+    explain_instance,
+)
 
 __all__ = [
+    "compute_batch_shap_values",
     "compute_numeric_drift_report",
     "explain_global",
     "explain_instance",
+    "save_drift_report",
 ]
-
-
-def __getattr__(name: str) -> Any:
-    if name == "compute_numeric_drift_report":
-        from src.monitoring.data_drift import compute_numeric_drift_report
-
-        return compute_numeric_drift_report
-    if name in ("explain_global", "explain_instance"):
-        from src.monitoring.explainability import explain_global, explain_instance
-
-        return {"explain_global": explain_global, "explain_instance": explain_instance}[name]
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

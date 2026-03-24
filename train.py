@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import sys
 from pathlib import Path
@@ -34,7 +35,7 @@ def _ensure_src_on_path() -> None:
 
 _ensure_src_on_path()
 
-from src.common.logging_config import get_logger, setup_logging  # noqa: E402
+from src.common.logging_config import get_logger, log_event, setup_logging  # noqa: E402
 from src.config.loader import deep_get, load_train_config  # noqa: E402
 from src.data.loading import load_train_data  # noqa: E402
 from src.models.pipeline import build_lgbm_churn_pipeline  # noqa: E402
@@ -324,8 +325,14 @@ def main() -> int:
         )
         out_path.parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(fitted, out_path)
-        logger.info("Saved pipeline to %s", out_path)
-        logger.info("CV mean ROC-AUC: %.6f", cv["mean_roc_auc"])
+        log_event(
+            logger,
+            logging.INFO,
+            "training_artifact_saved",
+            path=str(out_path),
+            cv_mean_roc_auc=round(cv["mean_roc_auc"], 6),
+            n_rows=len(X),
+        )
         return fitted, cv, optuna_meta
 
     if use_mlflow:

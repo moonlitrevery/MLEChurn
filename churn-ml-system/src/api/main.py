@@ -12,7 +12,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from sklearn.pipeline import Pipeline
 
 from src.api.schemas import HealthResponse, PredictRequest, PredictResponse
-from src.common.logging_config import setup_logging
+from src.common.logging_config import log_event, setup_logging
 from src.inference.predictor import load_churn_pipeline, predict_churn_proba
 from src.models.schema import CATEGORICAL_COLUMNS, NUMERIC_COLUMNS
 
@@ -32,12 +32,18 @@ async def lifespan(app: FastAPI):
     setup_logging()
     project_root = os.environ.get("CHURN_PROJECT_ROOT")
     path = os.environ.get("CHURN_MODEL_PATH")
-    logger.info("Loading churn pipeline (project_root=%s)", project_root)
+    log_event(
+        logger,
+        logging.INFO,
+        "api_loading_model",
+        project_root=project_root,
+        model_path_set=bool(path),
+    )
     app.state.model = load_churn_pipeline(
         path if path else None,
         project_root=project_root,
     )
-    logger.info("Pipeline ready.")
+    log_event(logger, logging.INFO, "api_model_ready", project_root=project_root)
     yield
 
 
