@@ -59,6 +59,12 @@ churn-ml-system/.venv/bin/python -m uvicorn src.api.main:app --host 0.0.0.0 --po
 
 Docker (from repo root): `docker build -t churn-api -f Dockerfile .` then mount `./models` to `/app/models`.
 
+## Monitoring & batch scoring
+
+- **Data drift** — `src.monitoring.data_drift.compute_numeric_drift_report(reference_df, current_df)` compares numeric columns (defaults: schema numerics), reports mean/std deltas, optional KS test (`scipy.stats.ks_2samp`).
+- **SHAP** — `src.monitoring.explainability.explain_global` / `explain_instance` on the fitted `Pipeline` (uses the `model` step after `pipeline[:-1].transform`).
+- **Batch CSV** — `python -m src.batch.run_batch --input path/in.csv --output path/out.csv --project-root .` (set `PYTHONPATH=churn-ml-system`). Reuses `load_csv` and `predict_churn_proba`.
+
 ## Tests
 
 ```bash
@@ -80,6 +86,8 @@ MLEChurn/
       features/
       inference/
       models/
+      monitoring/
+      batch/
       tracking/
   tests/
 ```
