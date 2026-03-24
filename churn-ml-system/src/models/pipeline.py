@@ -1,14 +1,10 @@
 from __future__ import annotations
 
 from lightgbm import LGBMClassifier
-from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.pipeline import FeatureUnion, Pipeline
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.pipeline import Pipeline
 
-from features.engineering import ChurnFeatureEngineer
-from models.preprocessing import CoerceNumericColumns, DropColumns
-from models.schema import CATEGORICAL_COLUMNS, NUMERIC_COLUMNS
+from src.models.design_matrix import ChurnTableToDesignMatrixTransformer
+from src.models.preprocessing import CoerceNumericColumns, DropColumns
 
 
 def build_lgbm_churn_pipeline(
@@ -24,44 +20,17 @@ def build_lgbm_churn_pipeline(
     min_child_samples: int = 20,
     lgbm_n_jobs: int = -1,
 ) -> Pipeline:
-    tabular = ColumnTransformer(
-        transformers=[
-            (
-                "num",
-                Pipeline(
-                    steps=[
-                        ("imputer", SimpleImputer(strategy="median")),
-                    ]
-                ),
-                list(NUMERIC_COLUMNS),
-            ),
-            (
-                "cat",
-                OneHotEncoder(
-                    handle_unknown="ignore",
-                    sparse_output=False,
-                ),
-                list(CATEGORICAL_COLUMNS),
-            ),
-        ],
-        remainder="drop",
-        verbose_feature_names_out=False,
-    )
-    tabular.set_output(transform="pandas")
+    """
+    Sequential pipeline: table prep → design matrix (engineering + encoding) → LightGBM.
 
-    union = FeatureUnion(
-        transformer_list=[
-            ("engineered", ChurnFeatureEngineer()),
-            ("tabular", tabular),
-        ],
-    )
-    union.set_output(transform="pandas")
-
+    For reproducible metrics with thread parallelism, set ``lgbm_n_jobs: 1`` in config;
+    ``random_state`` is always passed through to the booster.
+    """
     return Pipeline(
         steps=[
             ("drop_id", DropColumns()),
             ("coerce_numeric", CoerceNumericColumns()),
-            ("features", union),
+            ("design_matrix", ChurnTableToDesignMatrixTransformer()),
             (
                 "model",
                 LGBMClassifier(

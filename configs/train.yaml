@@ -1,0 +1,40 @@
+# Training defaults (override via CLI flags or a second config path in code if extended).
+# Paths are relative to --project-root / CHURN_PROJECT_ROOT unless noted.
+
+random_seed: 42
+
+paths:
+  data_dir: datasets
+  model_output: models/churn_pipeline.joblib
+
+data:
+  nrows: null
+
+training:
+  n_splits: 5
+  cv_shuffle: true
+  lgbm_n_jobs: -1
+
+model:
+  n_estimators: 400
+  learning_rate: 0.05
+  num_leaves: 31
+  subsample: 0.9
+  colsample_bytree: 0.9
+  reg_alpha: 0.0
+  reg_lambda: 0.0
+  min_child_samples: 20
+
+optuna:
+  trials: 0
+  storage: null
+  study_name: null
+  lgbm_n_jobs: 1
+
+mlflow:
+  enabled: true
+  experiment_name: churn
+  tracking_uri: null
+
+logging:
+  level: INFO

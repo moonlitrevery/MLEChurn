@@ -12,7 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from inference.predictor import (
+from src.inference.predictor import (
     DEFAULT_MODEL_REL,
     load_churn_pipeline,
     predict_churn_proba,

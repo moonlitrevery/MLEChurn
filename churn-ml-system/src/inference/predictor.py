@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
-from data.loading import resolve_project_root
+from src.data.loading import resolve_project_root
 
 DEFAULT_MODEL_REL = Path("models") / "churn_pipeline.joblib"
 

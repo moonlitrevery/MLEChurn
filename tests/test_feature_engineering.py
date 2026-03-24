@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from features.engineering import OUTPUT_COLUMNS, ChurnFeatureEngineer
+from src.features.engineering import OUTPUT_COLUMNS, ChurnFeatureEngineer
 
 
 def _minimal_frame(n: int = 4) -> pd.DataFrame:

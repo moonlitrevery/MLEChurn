@@ -8,8 +8,8 @@ from typing import Any, Callable
 import optuna
 from sklearn.pipeline import Pipeline
 
-from models.pipeline import build_lgbm_churn_pipeline
-from models.training import cross_validate_stratified_roc_auc
+from src.models.pipeline import build_lgbm_churn_pipeline
+from src.models.training import cross_validate_stratified_roc_auc
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +34,7 @@ def make_cv_objective(
     *,
     n_splits: int,
     random_state: int,
+    shuffle: bool = True,
     lgbm_n_jobs: int = 1,
 ) -> Callable[[optuna.Trial], float]:
     """
@@ -56,6 +57,7 @@ def make_cv_objective(
             y,
             n_splits=n_splits,
             random_state=random_state,
+            shuffle=shuffle,
             verbose=False,
         )
         trial.set_user_attr("std_roc_auc", cv["std_roc_auc"])
@@ -71,6 +73,7 @@ def run_hyperparameter_search(
     n_trials: int,
     n_splits: int,
     random_state: int,
+    shuffle: bool = True,
     study_name: str | None = None,
     storage: str | None = None,
     callbacks: list[Any] | None = None,
@@ -91,6 +94,7 @@ def run_hyperparameter_search(
         y,
         n_splits=n_splits,
         random_state=random_state,
+        shuffle=shuffle,
         lgbm_n_jobs=lgbm_n_jobs,
     )
     study.optimize(

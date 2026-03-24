@@ -11,10 +11,10 @@ import pandas as pd
 from fastapi import Depends, FastAPI, HTTPException, Request
 from sklearn.pipeline import Pipeline
 
-from api.schemas import HealthResponse, PredictRequest, PredictResponse
-from common.logging_config import setup_logging
-from inference.predictor import load_churn_pipeline, predict_churn_proba
-from models.schema import CATEGORICAL_COLUMNS, NUMERIC_COLUMNS
+from src.api.schemas import HealthResponse, PredictRequest, PredictResponse
+from src.common.logging_config import setup_logging
+from src.inference.predictor import load_churn_pipeline, predict_churn_proba
+from src.models.schema import CATEGORICAL_COLUMNS, NUMERIC_COLUMNS
 
 logger = logging.getLogger(__name__)
 

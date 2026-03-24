@@ -7,7 +7,7 @@ from typing import Any
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from models.schema import ID_COLUMN, NUMERIC_COLUMNS
+from src.models.schema import ID_COLUMN, NUMERIC_COLUMNS
 
 
 class DropColumns(BaseEstimator, TransformerMixin):
