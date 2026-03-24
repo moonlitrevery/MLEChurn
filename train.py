@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-"""Train churn pipeline: load data, stratified CV, fit full model, joblib dump."""
-
 from __future__ import annotations
 
 import argparse
@@ -10,9 +7,15 @@ from pathlib import Path
 
 import joblib
 
-# Repo layout: churn-ml-system/train.py, churn-ml-system/src/{data,features,models}
-_PACKAGE_ROOT = Path(__file__).resolve().parent
-_SRC = _PACKAGE_ROOT / "src"
+# Repo layout: train.py at repo root; packages under churn-ml-system/src/
+_REPO_ROOT = Path(__file__).resolve().parent
+_SRC = _REPO_ROOT / "churn-ml-system" / "src"
+if not _SRC.is_dir():
+    _SRC = _REPO_ROOT / "src"
+if not _SRC.is_dir():
+    raise SystemExit(
+        "Cannot find source tree: expected churn-ml-system/src or src next to train.py."
+    )
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
@@ -53,7 +56,7 @@ def _parse_args() -> argparse.Namespace:
         "--output",
         "-o",
         type=Path,
-        default=_PACKAGE_ROOT / DEFAULT_MODEL_REL,
+        default=_REPO_ROOT / DEFAULT_MODEL_REL,
         help=f"joblib path for fitted pipeline (default: {DEFAULT_MODEL_REL}).",
     )
     p.add_argument("--n-splits", type=int, default=5, help="StratifiedKFold folds.")
@@ -107,7 +110,7 @@ def main() -> int:
 
     out_path = args.output.expanduser()
     out_path = (
-        (_PACKAGE_ROOT / out_path).resolve()
+        (_REPO_ROOT / out_path).resolve()
         if not out_path.is_absolute()
         else out_path.resolve()
     )

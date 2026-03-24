@@ -1,5 +1,8 @@
-# API image: mount a trained artifact at runtime, e.g.
-#   docker run --rm -p 8000:8000 -v "$(pwd)/models:/app/models" churn-api
+# Build from repository root (this file lives next to train.py / requirements.txt):
+#   docker build -t churn-api -f Dockerfile .
+#
+# Run with a mounted artifact (default path inside the container: /app/models/churn_pipeline.joblib):
+#   docker run --rm -p 8000:8000 -v "$(pwd)/models:/app/models:ro" churn-api
 
 FROM python:3.12-slim-bookworm
 
@@ -21,7 +24,7 @@ COPY requirements.txt .
 RUN python -m pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-COPY src ./src
+COPY churn-ml-system/src ./src
 
 RUN mkdir -p /app/models \
     && chown -R appuser:appuser /app
