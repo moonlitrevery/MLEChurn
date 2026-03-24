@@ -1,5 +1,6 @@
 datasets/
 data/
+mlruns/
 *.pkl
 *.joblib
 *.h5

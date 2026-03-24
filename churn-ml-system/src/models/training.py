@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import numpy as np
@@ -10,6 +11,8 @@ from sklearn.base import clone
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
+
+logger = logging.getLogger(__name__)
 
 
 def prepare_churn_target(y: pd.Series | np.ndarray | list[Any]) -> np.ndarray:
@@ -40,9 +43,10 @@ def cross_validate_stratified_roc_auc(
     n_splits: int = 5,
     random_state: int = 42,
     shuffle: bool = True,
+    verbose: bool = True,
 ) -> dict[str, Any]:
     """
-    Stratified K-fold CV; prints per-fold and mean ROC-AUC.
+    Stratified K-fold CV; logs per-fold and mean ROC-AUC when ``verbose``.
 
     Returns:
         ``fold_scores``, ``mean_roc_auc``, ``std_roc_auc``.
@@ -59,11 +63,13 @@ def cross_validate_stratified_roc_auc(
         proba = estimator.predict_proba(X.iloc[val_idx])[:, 1]
         score = roc_auc_score(y[val_idx], proba)
         fold_scores.append(float(score))
-        print(f"Fold {fold}/{n_splits} ROC-AUC: {score:.6f}")
+        if verbose:
+            logger.info("Fold %s/%s ROC-AUC: %.6f", fold, n_splits, score)
 
     mean_auc = float(np.mean(fold_scores))
     std_auc = float(np.std(fold_scores))
-    print(f"Mean ROC-AUC: {mean_auc:.6f} (std {std_auc:.6f})")
+    if verbose:
+        logger.info("Mean ROC-AUC: %.6f (std %.6f)", mean_auc, std_auc)
     return {
         "fold_scores": fold_scores,
         "mean_roc_auc": mean_auc,

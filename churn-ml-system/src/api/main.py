@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from contextlib import asynccontextmanager
 from typing import Annotated, Any
@@ -11,8 +12,11 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from sklearn.pipeline import Pipeline
 
 from api.schemas import HealthResponse, PredictRequest, PredictResponse
+from common.logging_config import setup_logging
 from inference.predictor import load_churn_pipeline, predict_churn_proba
 from models.schema import CATEGORICAL_COLUMNS, NUMERIC_COLUMNS
+
+logger = logging.getLogger(__name__)
 
 REQUIRED_FEATURE_COLUMNS: frozenset[str] = frozenset(NUMERIC_COLUMNS) | frozenset(
     CATEGORICAL_COLUMNS
@@ -25,12 +29,15 @@ def _required_columns_message(missing: set[str]) -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    setup_logging()
     project_root = os.environ.get("CHURN_PROJECT_ROOT")
     path = os.environ.get("CHURN_MODEL_PATH")
+    logger.info("Loading churn pipeline (project_root=%s)", project_root)
     app.state.model = load_churn_pipeline(
         path if path else None,
         project_root=project_root,
     )
+    logger.info("Pipeline ready.")
     yield
 
 
